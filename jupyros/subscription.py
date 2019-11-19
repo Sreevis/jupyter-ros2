@@ -78,8 +78,8 @@ class Subscription():
 
     def display(self):
         """ Display's widgets in the Jupyter Cell for a ros2 Subscription """
-        self.__widgets["start_btn"].on_click(self.__start_subscription)
-        self.__widgets["stop_btn"].on_click(self.__stop_subscription)
+        self.__widgets["start_btn"].on_click(self._start_subscription)
+        self.__widgets["stop_btn"].on_click(self._stop_subscription)
         btns = widgets.HBox((
             self.__widgets["start_btn"],
             self.__widgets["stop_btn"],
@@ -96,10 +96,10 @@ class Subscription():
             rclpy.spin_once(self.node, timeout_sec=0.1)
         self.__widgets["out"].append_stdout("Done!\n")
 
-    def __stop_subscription(self, _):
+    def _stop_subscription(self, _):
         self.__thread_state = False
 
-    def __start_subscription(self, _):
+    def _start_subscription(self, _):
         self.__thread_state = True
         local_thread = threading.Thread(target=self.__thread_target)
         local_thread.start()
