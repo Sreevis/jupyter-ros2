@@ -114,7 +114,6 @@ class Subscription():
         """
         @functools.wraps(func)
         def data_modifier(*args, **kargs):
-            self.__widgets["out"].append_stdout(f"in here\n")
             self.data = func(*args, **kargs)
             return self.data
 
