@@ -10,6 +10,7 @@ NotebookWebApplicationType = TypeVar('NotebookWebApplicationType')
 
 __version__ = _version.__version__
 
+
 class ROSStaticHandler(IPythonHandler):
     """ ROS Static Handler """
     def get(self, *args, **kwargs) -> None:
@@ -27,6 +28,7 @@ class ROSStaticHandler(IPythonHandler):
             self.write("Error opening file %s" % file)
 
         self.finish()
+
 
 def load_jupyter_server_extension(
         nb_server_app: NotebookWebApplicationType) -> None:

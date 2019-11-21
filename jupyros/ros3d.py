@@ -274,6 +274,7 @@ def js_extract_cls(cls) -> Tuple[str, str]:
                                   base_class=base_class_name,
                                   json_defaults=jd))
 
+
 def js_extract() -> None:
     clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
     # print(clsmembers)
