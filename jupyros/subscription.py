@@ -4,16 +4,23 @@ Subscription class for jupyter-ros2 Project
 Author: zmk5 (Zahi Kakish)
 
 """
+from typing import TypeVar
+from typing import Callable
 import threading
 import functools
 import ipywidgets as widgets
 
 try:
     import rclpy
+    from rclpy.node import Node
 except ModuleNotFoundError:
     print("The rclpy package is not found in your $PYTHONPATH. " +
           "Subscribe and publish are not going to work.")
     print("Do you need to activate your ros2 environment?")
+
+
+# Used for documentation purposes only
+MsgType = TypeVar('MsgType')
 
 
 class Subscription():
@@ -37,11 +44,10 @@ class Subscription():
         directly to the cell widget. By default this is turned off.
 
     """
-    def __init__(
-            self, node, msg_type, topic, callback, print_incoming_msg=False):
+    def __init__(self, node: Node, msg_type: MsgType, topic: str,
+                 callback: Callable, print_incoming_msg: bool = False) -> None:
         # Check if a ros2 node is provided.
-        if (not isinstance(node, rclpy.node.Node)
-                or not issubclass(type(node), rclpy.node.Node)):
+        if (not isinstance(node, Node) or not issubclass(type(node), Node)):
             raise TypeError(
                 "Input argument 'node' is not of type rclpy.node.Node!")
 
@@ -76,7 +82,7 @@ class Subscription():
             self.__subscription = node.create_subscription(
                 msg_type, topic, self.__data_msg(callback), 10)
 
-    def display(self):
+    def display(self) -> widgets.VBox:
         """ Display's widgets in the Jupyter Cell for a ros2 Subscription """
         self.__widgets["start_btn"].on_click(self._start_subscription)
         self.__widgets["stop_btn"].on_click(self._stop_subscription)
@@ -91,20 +97,20 @@ class Subscription():
         return vbox
 
 
-    def __thread_target(self):
+    def __thread_target(self) -> None:
         while self.__thread_state:
             rclpy.spin_once(self.node, timeout_sec=0.1)
         self.__widgets["out"].append_stdout("Done!\n")
 
-    def _stop_subscription(self, _):
+    def _stop_subscription(self, _) -> None:
         self.__thread_state = False
 
-    def _start_subscription(self, _):
+    def _start_subscription(self, _) -> None:
         self.__thread_state = True
         local_thread = threading.Thread(target=self.__thread_target)
         local_thread.start()
 
-    def __data_msg(self, func):
+    def __data_msg(self, func: Callable) -> Callable:
         """
         Decorator for saving data from a callback.
 
@@ -119,7 +125,7 @@ class Subscription():
 
         return data_modifier
 
-    def __print_msg(self, func):
+    def __print_msg(self, func: Callable) -> Callable:
         """
         Decorator for printing incoming ros2 messages.
 
