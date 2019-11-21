@@ -14,5 +14,5 @@ def _jupyter_nbextension_paths():
         'section': 'notebook',
         'src': 'static',
         'dest': 'jupyter-ros',
-        'require': 'jupyter-ros/extension'
+        'require': 'jupyter-ros/extension',
     }]
