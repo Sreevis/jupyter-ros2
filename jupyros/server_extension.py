@@ -1,14 +1,18 @@
 import os
+from typing import TypeVar
 from notebook.utils import url_path_join
 from notebook.base.handlers import IPythonHandler
 from ament_index_python.packages import get_package_prefix
 from jupyros import _version
 
+# Used for documentation purposes only
+NotebookWebApplicationType = TypeVar('NotebookWebApplicationType')
 
 __version__ = _version.__version__
 
 class ROSStaticHandler(IPythonHandler):
-    def get(self, *args, **kwargs):
+    """ ROS Static Handler """
+    def get(self, *args, **kwargs) -> None:
         if not args:
             self.write("Error - no argument supplied")
         argslist = args[0].split('/')
@@ -19,16 +23,19 @@ class ROSStaticHandler(IPythonHandler):
             with open(file, 'rb') as f:
                 data = f.read()
                 self.write(data)
-        except:
+        except FileNotFoundError:
             self.write("Error opening file %s" % file)
+
         self.finish()
 
-def load_jupyter_server_extension(nb_server_app):
+def load_jupyter_server_extension(
+        nb_server_app: NotebookWebApplicationType) -> None:
     """
     Called when the extension is loaded.
 
     Args:
-        nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
+        nb_server_app (NotebookWebApplication): handle to the Notebook webserver
+            instance.
     """
     web_app = nb_server_app.web_app
     host_pattern = '.*$'
