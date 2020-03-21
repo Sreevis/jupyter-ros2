@@ -1,35 +1,37 @@
-from __future__ import print_function
+"""
+Setup File for jupyter-ros2
+"""
+import os
+import sys
+import platform
+from distutils import log
+from subprocess import check_call
 from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
-from subprocess import check_call
-import os
-import sys
-import platform
 
-here = os.path.dirname(os.path.abspath(__file__))
-node_root = os.path.join(here, 'js')
-is_repo = os.path.exists(os.path.join(here, '.git'))
 
-npm_path = os.pathsep.join([
-    os.path.join(node_root, 'node_modules', '.bin'),
-                os.environ.get('PATH', os.defpath),
+HERE = os.path.dirname(os.path.abspath(__file__))
+NODE_ROOT = os.path.join(HERE, 'js')
+IS_REPO = os.path.exists(os.path.join(HERE, '.git'))
+NPM_PATH = os.pathsep.join([
+    os.path.join(NODE_ROOT, 'node_modules', '.bin'),
+    os.environ.get('PATH', os.defpath),
 ])
 
-from distutils import log
 log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-LONG_DESCRIPTION = 'ROS 3D Jupyter widget'
+LONG_DESCRIPTION = 'ros2 3D Jupyter widget'
 
 def js_prerelease(command, strict=False):
-    """decorator for building minified js/css prior to another command"""
+    """ Decorator for building minified js/css prior to another command """
     class DecoratedCommand(command):
         def run(self):
             jsdeps = self.distribution.get_command_obj('jsdeps')
-            if not is_repo and all(os.path.exists(t) for t in jsdeps.targets):
+            if not IS_REPO and all(os.path.exists(t) for t in jsdeps.targets):
                 # sdist, nothing to do
                 command.run(self)
                 return
@@ -63,11 +65,11 @@ class NPM(Command):
 
     user_options = []
 
-    node_modules = os.path.join(node_root, 'node_modules')
+    node_modules = os.path.join(NODE_ROOT, 'node_modules')
 
     targets = [
-        os.path.join(here, 'jupyros', 'static', 'extension.js'),
-        os.path.join(here, 'jupyros', 'static', 'index.js')
+        os.path.join(HERE, 'jupyros', 'static', 'extension.js'),
+        os.path.join(HERE, 'jupyros', 'static', 'index.js')
     ]
 
     def initialize_options(self):
@@ -92,7 +94,7 @@ class NPM(Command):
             return False
 
     def should_run_npm_install(self):
-        package_json = os.path.join(node_root, 'package.json')
+        package_json = os.path.join(NODE_ROOT, 'package.json')
         node_modules_exists = os.path.exists(self.node_modules)
         return self.has_npm()
 
@@ -103,13 +105,13 @@ class NPM(Command):
                       + "using sudo, make sure `npm` is available to sudo")
 
         env = os.environ.copy()
-        env['PATH'] = npm_path
+        env['PATH'] = NPM_PATH
 
         if self.should_run_npm_install():
             log.info("Installing build dependencies with npm.  This may take a while...")
             npm_name = self.get_npm_name()
             check_call(
-                [npm_name, 'install'], cwd=node_root, stdout=sys.stdout,
+                [npm_name, 'install'], cwd=NODE_ROOT, stdout=sys.stdout,
                 stderr=sys.stderr)
             os.utime(self.node_modules, None)
 
@@ -123,24 +125,24 @@ class NPM(Command):
         # update package data in case this created new files
         update_package_data(self.distribution)
 
-version_ns = {}
-with open(os.path.join(here, 'jupyros', '_version.py')) as f:
-    exec(f.read(), {}, version_ns)
+VERSION_NS = {}
+with open(os.path.join(HERE, 'jupyros2', '_version.py')) as f:
+    exec(f.read(), {}, VERSION_NS)
 
-setup_args = {
-    'name': 'jupyros',
-    'version': version_ns['__version__'],
-    'description': 'ROS 3D Jupyter widget',
+SETUP_ARGS = {
+    'name': 'jupyros2',
+    'version': VERSION_NS['__version__'],
+    'description': 'ros2 3D Jupyter widget',
     'long_description': LONG_DESCRIPTION,
     'include_package_data': True,
     'data_files': [
         ('share/jupyter/nbextensions/jupyter-ros', [
-            'jupyros/static/extension.js',
-            'jupyros/static/index.js',
-            'jupyros/static/index.js.map',
+            'jupyros2/static/extension.js',
+            'jupyros2/static/index.js',
+            'jupyros2/static/index.js.map',
         ],),
-        ('etc/jupyter/nbconfig/notebook.d/' ,['jupyros/etc/jupyros.json']),
-        ('etc/jupyter/jupyter_notebook_config.d/', ['jupyros/etc/jupyros_server_extension.json'])
+        ('etc/jupyter/nbconfig/notebook.d/', ['jupyros2/etc/jupyros.json']),
+        ('etc/jupyter/jupyter_notebook_config.d/', ['jupyros2/etc/jupyros_server_extension.json'])
     ],
     'install_requires': [
         'ipywidgets>=7.0.0',
@@ -156,9 +158,9 @@ setup_args = {
         'sdist': js_prerelease(sdist, strict=True),
         'jsdeps': NPM,
     },
-    'author': 'Wolf Vollprecht',
-    'author_email': 'w.vollprecht@gmail.com',
-    'url': 'https://github.com/RoboStack/jupyter-ros',
+    'author': 'Zahi Kakish',
+    'author_email': 'zkakish@gmail.com',
+    'url': 'https://github.com/zmk5/jupyter-ros2',
     'keywords': [
         'ipython',
         'jupyter',
@@ -170,13 +172,8 @@ setup_args = {
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Topic :: Multimedia :: Graphics',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
 }
 
-setup(**setup_args)
+setup(**SETUP_ARGS)
