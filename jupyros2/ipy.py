@@ -18,4 +18,4 @@ try:
         t.start()
         return out
 except:
-    print("register_cell_magic not enabled!")
+    print('register_cell_magic not enabled!')

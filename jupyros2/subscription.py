@@ -14,9 +14,9 @@ try:
     import rclpy
     from rclpy.node import Node
 except ModuleNotFoundError:
-    print("The rclpy package is not found in your $PYTHONPATH. " +
-          "Subscribe and publish are not going to work.")
-    print("Do you need to activate your ros2 environment?")
+    print('The rclpy package is not found in your $PYTHONPATH. ' +
+          'Subscribe and publish are not going to work.')
+    print('Do you need to activate your ros2 environment?')
 
 
 # Used for documentation purposes only
@@ -44,23 +44,24 @@ class Subscription():
         directly to the cell widget. By default this is turned off.
 
     """
+
     def __init__(self, node: Node, msg_type: MsgType, topic: str,
                  callback: Callable, print_incoming_msg: bool = False) -> None:
         # Check if a ros2 node is provided.
         if (not isinstance(node, Node) or not issubclass(type(node), Node)):
             raise TypeError(
-                "Input argument 'node' is not of type rclpy.node.Node!")
+                'Input argument `node` is not of type `rclpy.node.Node`!')
 
         # Check if topic already created.
         for operating_subscription in node.subscriptions:
-            if topic[0] != "/":
-                if "/" + topic is operating_subscription.topic:
+            if topic[0] != '/':
+                if '/' + topic is operating_subscription.topic:
                     raise AttributeError(
-                        f"Subscription for topic, /{topic}, already created!")
+                        f'Subscription for topic, /{topic}, already created!')
 
             if topic is operating_subscription.topic:
                 raise AttributeError(
-                    f"Subscription for topic, {topic}, already created!")
+                    f'Subscription for topic, {topic}, already created!')
 
         self.node = node
         self.topic = topic
@@ -68,9 +69,9 @@ class Subscription():
         self.data = None
         self.__thread_state = False
         self.__widgets = {
-            "start_btn": widgets.Button(description='Start'),
-            "stop_btn": widgets.Button(description='Stop'),
-            "out": widgets.Output(layout={'border': '1px solid gray'}),
+            'start_btn': widgets.Button(description='Start'),
+            'stop_btn': widgets.Button(description='Stop'),
+            'out': widgets.Output(layout={'border': '1px solid gray'}),
             }
 
         if print_incoming_msg:
@@ -83,24 +84,23 @@ class Subscription():
                 msg_type, topic, self.__data_msg(callback), 10)
 
     def display(self) -> widgets.VBox:
-        """ Display's widgets in the Jupyter Cell for a ros2 Subscription """
-        self.__widgets["start_btn"].on_click(self._start_subscription)
-        self.__widgets["stop_btn"].on_click(self._stop_subscription)
+        """Display widgets in the Jupyter Cell for a ros2 Subscription."""
+        self.__widgets['start_btn'].on_click(self._start_subscription)
+        self.__widgets['stop_btn'].on_click(self._stop_subscription)
         btns = widgets.HBox((
-            self.__widgets["start_btn"],
-            self.__widgets["stop_btn"],
+            self.__widgets['start_btn'],
+            self.__widgets['stop_btn'],
             ))
         vbox = widgets.VBox((
             btns,
-            self.__widgets["out"]
+            self.__widgets['out']
             ))
         return vbox
-
 
     def __thread_target(self) -> None:
         while self.__thread_state:
             rclpy.spin_once(self.node, timeout_sec=0.1)
-        self.__widgets["out"].append_stdout("Done!\n")
+        self.__widgets['out'].append_stdout('Done!\n')
 
     def _stop_subscription(self, _) -> None:
         self.__thread_state = False
@@ -138,6 +138,6 @@ class Subscription():
         @functools.wraps(func)
         def print_modifier(*args, **kargs):
             func(*args, **kargs)
-            self.__widgets["out"].append_stdout(f"{args[0]}\n")
+            self.__widgets['out'].append_stdout(f'{args[0]}\n')
 
         return print_modifier

@@ -2,17 +2,21 @@ import sys
 import signal
 from math import pi
 from threading import Thread
+import xml.dom.minidom
+
+from typing import Any
+from typing import Optional
+
 import rclpy
 from rclpy.node import Node
-import xml.dom.minidom
 from sensor_msgs.msg import JointState
 
 RANGE = 10000
 
 
 class JointStatePublisher(Node):
-    def get_param(self, name, value=None):
-        private = "~%s" % name
+    def get_param(self, name: str, value: Optional[Any] = None) -> Any:
+        private = f'~{name}'
         if self.has_parameter(private):
             return self.get_parameter(private)
 
@@ -33,7 +37,7 @@ class JointStatePublisher(Node):
                 if child.getElementsByTagName('revolute'):
                     joint = child.getElementsByTagName('revolute')[0]
                 else:
-                    self.get_logger().warn("Unknown joint type %s" % child)
+                    self.get_logger().warn(f'Unknown joint type {child}')
                     continue
 
                 if joint:
@@ -52,10 +56,10 @@ class JointStatePublisher(Node):
                     'position': 0,
                     'velocity': 0,
                     'effort':0,
-                    }
+                }
                 self.free_joints[name] = joint
 
-    def init_urdf(self, robot):
+    def init_urdf(self, robot) -> None:
         robot = robot.getElementsByTagName('robot')[0]
         # Find all non-fixed joints
         for child in robot.childNodes:
@@ -79,7 +83,8 @@ class JointStatePublisher(Node):
                         minval = float(limit.getAttribute('lower'))
                         maxval = float(limit.getAttribute('upper'))
                     except:
-                        self.get_logger().warn(f"{name} is not fixed, nor continuous, but limits are not specified!")
+                        self.get_logger().warn(f'{name} is not fixed, ' +
+                            'nor continuous, but limits are not specified!')
                         continue
 
                 safety_tags = child.getElementsByTagName('safety_controller')
@@ -129,25 +134,25 @@ class JointStatePublisher(Node):
 
                 self.free_joints[name] = joint
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('joint_state_publisher')
         description = self.get_param('robot_description')
 
         self.free_joints = {}
         self.joint_list = [] # for maintaining the original order of the joints
-        self.dependent_joints = self.get_param("dependent_joints", {})
+        self.dependent_joints = self.get_param('dependent_joints', {})
         self.use_mimic = self.get_param('use_mimic_tags', True)
         self.use_small = self.get_param('use_smallest_joint_limits', True)
 
-        self.zeros = self.get_param("zeros")
+        self.zeros = self.get_param('zeros')
 
-        self.pub_def_positions = self.get_param("publish_default_positions", True)
-        self.pub_def_vels = self.get_param("publish_default_velocities", False)
-        self.pub_def_efforts = self.get_param("publish_default_efforts", False)
+        self.pub_def_positions = self.get_param('publish_default_positions', True)
+        self.pub_def_vels = self.get_param('publish_default_velocities', False)
+        self.pub_def_efforts = self.get_param('publish_default_efforts', False)
 
         # ros2 loop timer and params
-        hz = self.get_param("rate", 10)  # 10hz
-        self.delta = self.get_param("delta", 0.0)
+        hz = self.get_param('rate', 10)  # 10hz
+        self.delta = self.get_param('delta', 0.0)
         self.timer = self.create_timer(1/hz, self.loop)
 
         # TODO: `robot` returns as NoneType
@@ -157,24 +162,24 @@ class JointStatePublisher(Node):
         # else:
         #     self.init_urdf(robot)
 
-        use_gui = self.get_param("use_gui", False)
+        use_gui = self.get_param('use_gui', False)
 
         if use_gui:
-            num_rows = self.get_param("num_rows", 0)
+            num_rows = self.get_param('num_rows', 0)
             self.app = QApplication(sys.argv)
-            self.gui = JointStatePublisherGui("Joint State Publisher", self, num_rows)
+            self.gui = JointStatePublisherGui('Joint State Publisher', self, num_rows)
             self.gui.show()
         else:
             self.gui = None
 
-        source_list = self.get_param("source_list", [])
+        source_list = self.get_param('source_list', [])
         self.sources = []
         for source in source_list:
             self.sources.append(self.create_subscription(JointState, source, self.source_cb))
 
         self.pub = self.create_publisher(JointState, 'joint_states', 10)
 
-    def source_cb(self, msg):
+    def source_cb(self, msg) -> None:
         for i in range(len(msg.name)):
             name = msg.name[i]
             if name not in self.free_joints:
@@ -209,7 +214,7 @@ class JointStatePublisher(Node):
             # signal instead of directly calling the update_sliders method, to switch to the QThread
             self.gui.sliderUpdateTrigger.emit()
 
-    def loop(self):
+    def loop(self) -> None:
 
         # Publish Joint States
         msg = JointState()
@@ -262,8 +267,10 @@ class JointStatePublisher(Node):
                 recursive_mimic_chain_joints = [name]
                 while parent in self.dependent_joints:
                     if parent in recursive_mimic_chain_joints:
-                        error_message = "Found an infinite recursive mimic chain"
-                        self.get_logger().error("{}: [{}, {}]".format(error_message, ', '.join(recursive_mimic_chain_joints), parent))
+                        error_message = 'Found an infinite recursive mimic chain'
+                        error_joint = ", ".join(recursive_mimic_chain_joints)
+                        self.get_logger().error(
+                            f'{error_message}: [{error_joint}, {parent}]')
                         sys.exit(-1)
 
                     recursive_mimic_chain_joints.append(parent)
@@ -287,7 +294,7 @@ class JointStatePublisher(Node):
             # Only publish non-empty messages
             self.pub.publish(msg)
 
-    def update(self, delta):
+    def update(self, delta) -> None:
         for name, joint in self.free_joints.items():
             forward = joint.get('forward', True)
             if forward:

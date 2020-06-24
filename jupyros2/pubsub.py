@@ -6,9 +6,9 @@ try:
     import rclpy
 
 except ModuleNotFoundError:
-    print("The rclpy package is not found in your $PYTHONPATH. " +
-          "Subscribe and publish are not going to work.")
-    print("Do you need to activate your ros2 environment?")
+    print('The rclpy package is not found in your $PYTHONPATH. ' +
+          'Subscribe and publish are not going to work.')
+    print('Do you need to activate your ros2 environment?')
 
 OUTPUT_REGISTRY = {}
 SUBSCRIBER_REGISTRY = {}
@@ -54,14 +54,14 @@ def subscribe(node, topic, msg_type, callback):
     # Check if a ros2 node is provided.
     if (not isinstance(node, rclpy.node.Node)
             or not issubclass(type(node), rclpy.node.Node)):
-        raise TypeError("Input argument 'node' is not of type rclpy.node.Node!")
+        raise TypeError('Input argument `node` is not of type `rclpy.node.Node`!')
 
     if SUBSCRIBER_REGISTRY.get(topic):
-        raise RuntimeError("Already registerd...")
+        raise RuntimeError('Already registerd...')
 
     out = widgets.Output(layout={'border': '1px solid gray'})
     def test_callback(msg):
-        out.append_stdout(f"{msg.position.x}")
+        out.append_stdout(f'{msg.position.x}')
     SUBSCRIBER_REGISTRY[topic] = node.create_subscription(
         msg_type, topic, test_callback, 10)
     OUTPUT_REGISTRY[topic] = out

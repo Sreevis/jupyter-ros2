@@ -11,23 +11,23 @@ try:
     import rclpy
     from sensor_msgs.msg import Image
 except ModuleNotFoundError:
-    print("The rclpy package is not found in your $PYTHONPATH. " +
-          "Subscribe and publish are not going to work.")
-    print("Do you need to activate your ros2 environment?")
+    print('The rclpy package is not found in your $PYTHONPATH. ' +
+          'Subscribe and publish are not going to work.')
+    print('Do you need to activate your ros2 environment?')
 
 try:
     import cv2
 except ModuleNotFoundError:
-    print("OpenCV not installed or sourced! Image messages " +
-          "will not work until then!")
+    print('OpenCV not installed or sourced! Image messages ' +
+          'will not work until then!')
 
 try:
     from cv_bridge import CvBridge
     from cv_bridge import CvBridgeError
     bridge = CvBridge()
 except ModuleNotFoundError:
-    print("CvBridge not installed or sourced! Image messages " +
-          "will not work until then!")
+    print('CvBridge not installed or sourced! Image messages ' +
+          'will not work until then!')
 
 
 def add_widgets(msg_instance, widget_dict, widget_list, prefix=''):
@@ -90,9 +90,9 @@ THREAD_MAP = {}
 
 def img_to_msg(imgpath):
     if not cv2 or not CvBridge:
-        raise RuntimeError("CV Bridge is not installed, please install it to" +
-                           " publish Images\nsudo apt-get install " +
-                           "ros-$(rosversion -d)-cv-bridge")
+        raise RuntimeError('CV Bridge is not installed, please install it to' +
+                           ' publish Images\nsudo apt-get install ' +
+                           'ros-$(rosversion -d)-cv-bridge')
 
     img = cv2.imread(imgpath)
     if img is None:
@@ -109,7 +109,7 @@ def publish(node, topic, msg_type):
     an appropriate widget.
     A publisher is automatically created which publishes to the
     topic given as topic parameter. This allows pressing the
-    "Send Message" button to send the message to ROS.
+    'Send Message' button to send the message to ROS.
 
     @param node An rclpy node class
     @param msg_type The message type
@@ -120,17 +120,17 @@ def publish(node, topic, msg_type):
     # Check if a ros2 node is provided.
     if (not isinstance(node, rclpy.node.Node)
             or not issubclass(type(node), rclpy.node.Node)):
-        raise TypeError("Input argument 'node' is not of type rclpy.node.Node!")
+        raise TypeError('Input argument `node` is not of type `rclpy.node.Node`!')
 
     # Check if topic already created.
     for operating_publisher in node.publishers:
-        if topic[0] != "/":
-            if "/" + topic is operating_publisher.topic:
-                print(f"Publisher for topic, /{topic}, already created!")
+        if topic[0] != '/':
+            if '/' + topic is operating_publisher.topic:
+                print(f'Publisher for topic, /{topic}, already created!')
                 return
 
         if topic is operating_publisher.topic:
-            print(f"Publisher for topic, {topic}, already created!")
+            print(f'Publisher for topic, {topic}, already created!')
             return
 
     publisher = node.create_publisher(msg_type, topic, 10)
@@ -138,9 +138,9 @@ def publish(node, topic, msg_type):
     widget_list = []
     widget_dict = {}
 
-    latch_check = widgets.Checkbox(description="Latch Message")
-    rate_field = widgets.IntText(description="Rate", value=5)
-    stop_btn = widgets.Button(description="Start")
+    latch_check = widgets.Checkbox(description='Latch Message')
+    rate_field = widgets.IntText(description='Rate', value=5)
+    stop_btn = widgets.Button(description='Start')
 
     def latch_value_change(arg):
         publisher.impl.is_latch = arg['new']
@@ -148,13 +148,13 @@ def publish(node, topic, msg_type):
     latch_check.observe(latch_value_change, 'value')
 
     add_widgets(msg_type(), widget_dict, widget_list)
-    send_btn = widgets.Button(description="Send Message")
+    send_btn = widgets.Button(description='Send Message')
 
     def send_msg(arg):
         msg_to_send = msg_type()
         widget_dict_to_msg(msg_to_send, widget_dict)
         publisher.publish(msg_to_send)
-        print("Message Sent!")
+        print('Message Sent!')
 
     send_btn.on_click(send_msg)
 
@@ -170,9 +170,9 @@ def publish(node, topic, msg_type):
         if THREAD_MAP[topic]:
             local_thread = threading.Thread(target=thread_target)
             local_thread.start()
-            stop_btn.description = "Stop"
+            stop_btn.description = 'Stop'
         else:
-            stop_btn.description = "Start"
+            stop_btn.description = 'Start'
 
     stop_btn.on_click(start_thread)
     btm_box = widgets.HBox((send_btn, latch_check, rate_field, stop_btn))
@@ -224,46 +224,46 @@ def bag_player(bagfile=''):
 
     @return jupyter widget for display
     """
-    raise FutureWarning("Bag files have not been implemented fully in ros2!")
+    raise FutureWarning('Bag files have not been implemented fully in ros2!')
     widget_list = []
     bag_player.sp = None
     ###### Fields #########################################################
     bgpath_txt = widgets.Text()
-    bgpath_box = widgets.HBox([widgets.Label("Bag file path:"), bgpath_txt])
+    bgpath_box = widgets.HBox([widgets.Label('Bag file path:'), bgpath_txt])
     bgpath_txt.value = bagfile
-    play_btn = widgets.Button(description="Play", icon='play')
-    pause_btn = widgets.Button(description="Pause", icon='pause',
+    play_btn = widgets.Button(description='Play', icon='play')
+    pause_btn = widgets.Button(description='Pause', icon='pause',
                                disabled=True)
-    step_btn = widgets.Button(description="Step", icon='step-forward',
+    step_btn = widgets.Button(description='Step', icon='step-forward',
                               disabled=True)
-    ibox = widgets.Checkbox(description="Immediate")
-    lbox = widgets.Checkbox(description="Loop")
-    clockbox = widgets.Checkbox(description="Clock")
-    dzbox = widgets.Checkbox(description="Duration")
-    kabox = widgets.Checkbox(description="Keep alive")
+    ibox = widgets.Checkbox(description='Immediate')
+    lbox = widgets.Checkbox(description='Loop')
+    clockbox = widgets.Checkbox(description='Clock')
+    dzbox = widgets.Checkbox(description='Duration')
+    kabox = widgets.Checkbox(description='Keep alive')
     start_float = widgets.FloatText(value=0)
-    start_box = widgets.HBox([widgets.Label("Start time:"), start_float])
+    start_box = widgets.HBox([widgets.Label('Start time:'), start_float])
     que_int = widgets.IntText(value=100)
-    que_box = widgets.HBox([widgets.Label("Queue size:"), que_int])
+    que_box = widgets.HBox([widgets.Label('Queue size:'), que_int])
     factor_float = widgets.FloatText(value=1)
     factor_box = widgets.HBox(
-        [widgets.Label("Multiply the publish rate by:"), factor_float])
+        [widgets.Label('Multiply the publish rate by:'), factor_float])
     delay_float = widgets.FloatText(value=0)
     delay_box = widgets.HBox(
-        [widgets.Label("Delay after every advertise call:"), delay_float])
+        [widgets.Label('Delay after every advertise call:'), delay_float])
     duration_float = widgets.FloatText(value=0)
     duration_box = widgets.HBox(
-        [dzbox, widgets.Label("Duration in secs:"), duration_float])
+        [dzbox, widgets.Label('Duration in secs:'), duration_float])
     out_box = widgets.Output(layout={'border': '1px solid black'})
 
     def ply_clk(arg):
-        """ Play Button """
-        if play_btn.description == "Play":
+        """Callback to Play Button."""
+        if play_btn.description == 'Play':
             info_dict = yaml.load(
                 subprocess.Popen(['rosbag', 'info', '--yaml', bgpath_txt.value],
                                  stdout=subprocess.PIPE).communicate()[0])
             if info_dict is None:
-                raise FileNotFoundError("Bag file not found!")
+                raise FileNotFoundError('Bag file not found!')
             else:
 
                 cmd = ['rosbag', 'play', bgpath_txt.value]
@@ -276,27 +276,27 @@ def bag_player(bagfile=''):
                 if clockbox.value:
                     cmd.append('--clock')
                 if dzbox.value:
-                    cmd.append("--duration={}".format(
+                    cmd.append('--duration={}'.format(
                         max(0, duration_float.value)))
-                cmd.append("--rate={}".format(max(0, factor_float.value)))
-                cmd.append("--start={}".format(max(0, start_float.value)))
-                cmd.append("--queue={}".format(max(0, que_int.value)))
-                cmd.append("--delay={}".format(max(0, delay_float.value)))
-                play_btn.description = "Stop"
+                cmd.append('--rate={}'.format(max(0, factor_float.value)))
+                cmd.append('--start={}'.format(max(0, start_float.value)))
+                cmd.append('--queue={}'.format(max(0, que_int.value)))
+                cmd.append('--delay={}'.format(max(0, delay_float.value)))
+                play_btn.description = 'Stop'
                 play_btn.icon = 'stop'
                 pause_btn.disabled = False
                 bag_player.sp = subprocess.Popen(cmd, stdin=subprocess.PIPE)
                 with out_box:
-                    print("Bag summary:")
+                    print('Bag summary:')
                     for key, val in info_dict.items():
-                        print(key, ":", val)
+                        print(key, ':', val)
         else:
             try:
                 os.killpg(
                     os.getpgid(bag_player.sp.pid), subprocess.signal.SIGINT)
             except KeyboardInterrupt:
                 pass
-            play_btn.description = "Play"
+            play_btn.description = 'Play'
             play_btn.icon = 'play'
             pause_btn.disabled = True
             pause_btn.description = 'Pause'
@@ -305,7 +305,7 @@ def bag_player(bagfile=''):
     play_btn.on_click(ply_clk)
 
     def pause_clk(arg):
-        """ Pause Button """
+        """Callback to Pause Button."""
         bag_player.sp.stdin.write(b' \n')
         bag_player.sp.stdin.flush()
         if pause_btn.description == 'Pause':
@@ -319,7 +319,7 @@ def bag_player(bagfile=''):
     pause_btn.on_click(pause_clk)
 
     def step_clk(arg):
-        """ Step Button """
+        """Callback to Step Button."""
         bag_player.sp.stdin.write(b's\n')
         bag_player.sp.stdin.flush()
     step_btn.on_click(step_clk)

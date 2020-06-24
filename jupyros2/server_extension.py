@@ -3,7 +3,7 @@ from typing import TypeVar
 from notebook.utils import url_path_join
 from notebook.base.handlers import IPythonHandler
 from ament_index_python.packages import get_package_prefix
-from jupyros import _version
+from jupyros2 import _version
 
 # Used for documentation purposes only
 NotebookWebApplicationType = TypeVar('NotebookWebApplicationType')
@@ -12,20 +12,21 @@ __version__ = _version.__version__
 
 
 class ROSStaticHandler(IPythonHandler):
-    """ ROS Static Handler """
+    """ROS Static Handler."""
+
     def get(self, *args, **kwargs) -> None:
         if not args:
-            self.write("Error - no argument supplied")
+            self.write('Error - no argument supplied')
         argslist = args[0].split('/')
         package, rest = argslist[0], '/'.join(argslist[1:])
 
-        file = os.path.join(get_package_prefix(package), rest)
+        file_path = os.path.join(get_package_prefix(package), rest)
         try:
-            with open(file, 'rb') as f:
+            with open(file_path, 'rb') as f:
                 data = f.read()
                 self.write(data)
         except FileNotFoundError:
-            self.write("Error opening file %s" % file)
+            self.write(f'Error opening file {file_path}')
 
         self.finish()
 
